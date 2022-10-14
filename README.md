@@ -641,15 +641,153 @@ b.join("-")            // => "---------": a string of 9 hyphens
 
 ​	1、JS的函数声明是函数名变成一个变量，这个变量的值是函数本身。
 
+​	2、如果函数挂载在一个对象上作为其属性，它就被称为方法。当该方法在对象中被调用或通过对象调用时，该对象就是该方法函数的调用上下文或 this 值。用于初始化新创建的对象的函数称为构造函数。
 
+​	3、在 JavaScript 中，函数是对象，它们可以被程序操作。例如，JavaScript 可以将函数赋给变量，并将它们传递给其他函数。由于函数是对象，所以您可以给它们设置属性，甚至调用它们的方法。
 
+​	4、JavaScript 函数可以嵌套在其他函数中定义，并且它们可以访问定义它们所处的作用域内任何变量。这意味着 JavaScript 函数是闭包。
 
+### 8.1 定义函数
 
+​	1、最直接的方式是使用functi关键字。ES6定义了一种新方法来定义函数：”箭头函数“。
 
+#### 8.1.1 函数声明
 
+​	1、函数声明由 function 关键字组成，后面跟着这些组件:
 
+- 函数名称标识符。名称是函数声明的必要部分:它用作变量的名称，并将新定义的函数对象赋值给该变量。
+- 一对圆括号，其中包含由0个或者多个用逗号分隔的标识符组成的列表。这些标识符是函数的参数名，它们的行为类似于函数体中的局部变量。
+- 一对花括号，其中包含由0条或者多条 JavaScript 语句。这些语句构成了函数体：每当函数调用时，就会执行这些语句。
 
+​	2、在 ES6 之前，函数只允许在 JavaScript 文件顶层或者其他函数中声明。然而一些实现违反规约，在循环体条件体或者其他块中定义函数。在 ES6 的严格模式下，函数允许在块内进行声明。一个定义在块内的函数只存在于该块内，块外是不可见的。
 
+#### 8.1.2 函数表达式
+
+```javascript
+// This function expression defines a function that squares its argument.
+// Note that we assign it to a variable
+const square = function(x) { return x*x; };
+
+// Function expressions can include names, which is useful for recursion.
+const f = function fact(x) { if (x <= 1) return 1; else return x*fact(x-1); };
+
+// Function expressions can also be used as arguments to other functions:
+[3,2,1].sort(function(a,b) { return a-b; });
+
+// Function expressions are sometimes defined and immediately invoked:
+let tensquared = (function(x) {return x*x;}(10));
+
+```
+
+​	1、使用const定义函数表达式。避免意外重写。
+
+#### 8.1.3 箭头函数
+
+​	1、箭头函数定义不需要function关键字，也不需要一个函数名称。一般箭头函数用圆括号包含一个逗号分隔的参数列表，接一个 => 箭头，后面是花括号包含的函数体。
+
+```javascript
+const sum = (x, y) => { return x + y; };
+```
+
+​	2、箭头函数支持更加简洁的语法。如果函数体只有一个简单的 return 语句，你可以省略 return 关键字，分号和花括号都一起省略，将函数体写成一个计算返回值的表达式。
+
+```javascript
+const sum = (x, y) => x + y;
+```
+
+​	3、如果函数只有一个参数，可以省略圆括号
+
+```javascript
+const polynomial = x => x*x + 2*x + 3;
+```
+
+​	4、如果箭头函数没有参数，必须写一对空圆括号
+
+```javascript
+const constantFunc = () => 42;
+```
+
+​	5、此外，如果箭头函数体是一个单一的 return 语句，而且他返回的是一个对象字面量，那必须将对象字面量用圆括号包起来，避免将对象字面量的大括号误解成函数体的大括号。
+
+```javascript
+const f = x => { return { value: x }; };  // Good: f() returns an object
+const g = x => ({ value: x });            // Good: g() returns an object
+const h = x => { value: x };              // Bad: h() returns nothing
+const i = x => { v: x, w: x };            // Bad: Syntax Error
+```
+
+​	6、简洁的箭头函数可以完美的传递一个函数给另外一个函数，比如一些数组的常规操作方法 map()，filter() 和 reduce()（见 §7.8.1），例如：
+
+```javascript
+// Make a copy of an array with null elements removed.
+let filtered = [1,null,2,3].filter(x => x !== null); // filtered == [1,2,3]
+// Square some numbers:
+let squares = [1,2,3,4].map(x => x*x);               // squares == [1,4,9,16]
+```
+
+​	7、箭头函数不同于用关键字定义的函数：箭头函数从定义它们的环境继承 this 关键字，而不是像其他定义方式那样定义自己的调用上下文。
+
+#### 8.1.4 嵌套函数
+
+```javascript
+function hypotenuse(a, b) {
+    function square(x) { return x*x; }
+    return Math.sqrt(square(a) + square(b));
+}
+```
+
+​	1、内部函数可以读写外部函数定义的参数
+
+### 8.2 调用函数
+
+​	1、函数在调用时才会执行，调用方式有以下五种：
+
+​	作为函数
+
+​	作为方法
+
+​	作为构造函数
+
+​	通过它们的 call() 和 apply() 方法间接调用
+
+​	隐式调用，不同于普通函数调，通过 JavaScript 语言特性调用函数。
+
+#### 8.2.1 函数调用
+
+​	1、在调用中，每个实参表达式（圆括号内的）执行计算，返回值作为函数的实参。这些值传给函数定义的参数。在函数体内，参数的引用指向对应实参的值。
+
+​	2、对于常规的函数调用，函数返回值变成函数调用表达式的值。如果因解释器执行到函数结尾而返回，返回值就是 undefined。如果函数返回是因为解释器执行一个 return 语句，那么返回值是 return 后面的表达式的计算结果，如果 return 语句没有值也返回 undefined。
+
+​	3、在 ES2020 中你可以通过在函数表达式和圆括号之间插入 ?. 符号，使函数只有在不为 null 和 undefined 时候再调用。表达式 f?.(x) 等价（假设没有副作用）于：
+
+```javascript
+(f !== null && f !== undefined) ? f(x) : undefined
+```
+
+#### 8.2.2 方法调用
+
+​	1、方法就是对象属性函数。
+
+​	2、方法调用和函数调用的调用上下文有重要的区别。方法调用的调用上下文是对象/
+
+​	3、除了使用点来访问属性，也可以用方括号：
+
+```javascript
+o["m"](x,y);   // Another way to write o.m(x,y).
+a[0](z)        // Also a method invocation (assuming a[0] is a function).
+```
+
+​	4、关键字 this 没有变量作用域的限制，除了箭头函数，嵌套函数不会从包含它的函数中继承 this。如果嵌套函数作为方法调用，其 this 的值指向调用它的对象。如果嵌套的函数作为函数调用（不包含箭头函数），其 this 值不是全局对象（非严格模式下）就是 undefined（严格模式下）。
+
+​	5、嵌套函数如果是箭头函数，则可以正确的继承this值。
+
+#### 8.2.3 构造调用
+
+​	1、如果函数或者方法调用之前带有关键字 new，它就构成构造函数调用，构造函数调用和普通的函数调用以及方法调用在实参处理、调用上下文和返回值方面都有不同。
+
+​	2、js语法允许构造函数省略实参列表和圆括号
+
+​	3、构造函数调用创建一个新的空对象，这个对象继承自构造函数的 prototype 属性。构造函数试图初始化这个新创建的对象，并将这个对象用做其调用上下文，因此构造函数内可以使用 this 关键字来引用这个新创建的对象。注意，尽管构造函数看起来像一个方法调用，它依然会使用这个新对象作为调用上下文。
 
 
 
